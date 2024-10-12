@@ -1,14 +1,9 @@
 package br.com.exemplo.screenmatch2.principal;
 
-import br.com.exemplo.screenmatch2.model.DadosEpisodio;
-import br.com.exemplo.screenmatch2.model.DadosSerie;
-import br.com.exemplo.screenmatch2.model.DadosTemporada;
-import br.com.exemplo.screenmatch2.model.Episodio;
+import br.com.exemplo.screenmatch2.model.*;
+import br.com.exemplo.screenmatch2.repository.SerieRepository;
 import br.com.exemplo.screenmatch2.service.ConsumoApi;
 import br.com.exemplo.screenmatch2.service.ConverteDados;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -19,6 +14,11 @@ public class Principal {
     private final String ENDERECO = "https://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=67db0468";
     private List<DadosSerie> dadosSeries = new ArrayList<>();
+    private SerieRepository repositorio;
+
+    public Principal(SerieRepository repositorio) {
+        this.repositorio = repositorio;
+    }
 
     public void exibeMenu() {
         var opcao = -1;
@@ -56,7 +56,8 @@ public class Principal {
 
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
-        dadosSeries.add(dados);
+        Serie serie = new Serie(dados);
+        repositorio.save(serie);
         System.out.println(dados);
     }
 
@@ -81,6 +82,9 @@ public class Principal {
     }
 
     private void listarSeriesBuscadas(){
-        dadosSeries.forEach(System.out::println);
+        List<Serie> series = repositorio.findAll();
+        series.stream()
+                .sorted(Comparator.comparing(Serie::getGenero))
+                .forEach(System.out::println);
     }
 }
